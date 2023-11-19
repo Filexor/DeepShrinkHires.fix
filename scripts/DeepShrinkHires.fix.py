@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import gradio
 import torch
 
@@ -7,7 +9,9 @@ import modules.script_callbacks as script_callbacks
 import modules.sd_unet as sd_unet
 import modules.shared as shared
 
-from ldm.modules.diffusionmodules.util import timestep_embedding as timestep_embedding
+from ldm.modules.attention import SpatialTransformer
+from ldm.modules.diffusionmodules.openaimodel import Upsample, Downsample, ResBlock
+from ldm.modules.diffusionmodules.util import timestep_embedding
 
 class DeepShrinkHiresFixAction():
     def __init__(self, enable: bool, timestep: float, depth: int, scale: float):
@@ -23,6 +27,9 @@ class DeepShrinkHiresFix(scripts.Script):
     enableExperimental: bool = False
     experimentalTimestep: float = 900
     experimentalScales: list[float] = []
+    conv2d_only: bool = False
+    currentScale: float = 1
+    currentBlock: int = 0
 
     def __init__(self):
         pass
@@ -91,13 +98,38 @@ class DeepShrinkHiresFix(scripts.Script):
                 with gradio.Row():
                     Enable_Experimental = gradio.Checkbox(value=False, label="Enable Experimental Mode")
                     Timestep_Experimental = gradio.Number(value=900, label="Timestep")
-                    Scale_Experimental = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 2, 1,1,1, 1,1,1, 1,1,1, 1,1,1", label="Scale Factor List")
+                    Scale_Experimental = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,2, 1,2,2, 1, 2,2,2, 2,2,2, 2,2,1, 1,1,1", label="Scale Factor List")
+                    pass
+                with gradio.Row():
+                    Conv2DOnly = gradio.Checkbox(value=False, label="Conv2D Only")
                     pass
                 pass
             pass
         return [Enable_1, Timestep_1, Depth_1, Scale_1, Enable_2, Timestep_2, Depth_2, Scale_2, Enable_3, Timestep_3, Depth_3, Scale_3, Enable_4, Timestep_4, Depth_4, Scale_4,
                 Enable_5, Timestep_5, Depth_5, Scale_5, Enable_6, Timestep_6, Depth_6, Scale_6, Enable_7, Timestep_7, Depth_7, Scale_7, Enable_8, Timestep_8, Depth_8, Scale_8,
-                Enable_Experimental, Timestep_Experimental, Scale_Experimental]
+                Enable_Experimental, Timestep_Experimental, Scale_Experimental, Conv2DOnly]
+        pass
+
+    class DSHF_Scale(torch.nn.Module):
+        def forward(self, h):
+            if DeepShrinkHiresFix.conv2d_only:
+                return torch.nn.functional.interpolate(h.float(), scale_factor=DeepShrinkHiresFix.currentScale/DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)
+                pass
+            else:
+                return h
+                pass
+            pass
+        pass
+
+    class DSHF_Unscale(torch.nn.Module):
+        def forward(self, h):
+            if DeepShrinkHiresFix.conv2d_only:
+                return torch.nn.functional.interpolate(h.float(), scale_factor=DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock]/DeepShrinkHiresFix.currentScale, mode="bicubic", align_corners=False).to(h.dtype)
+                pass
+            else:
+                return h
+                pass
+            pass
         pass
 
     def process(self, p, *args):
@@ -113,13 +145,100 @@ class DeepShrinkHiresFix(scripts.Script):
         for scaleFactorsText in scaleFactorsTextsList:
             DeepShrinkHiresFix.experimentalScales.append(float(scaleFactorsText))
             pass
+        DeepShrinkHiresFix.conv2d_only = args[8*4+3]
         pass
 
     class DeepShrinkHiresFixUNet(sd_unet.SdUnet):
         def __init__(self, _model):
             super().__init__()
             self.model = _model.to(devices.device)
+            for i, input_block in enumerate(self.model.input_blocks):
+                for j, layer in enumerate(input_block):
+                    if isinstance(layer, ResBlock):
+                        for k, in_layer in enumerate(layer.in_layers):
+                            if isinstance(layer, torch.nn.Conv2d):
+                                self.model.input_blocks[i][j].in_layers[k] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), in_layer, DeepShrinkHiresFix.DSHF_Unscale())
+                                pass
+                            pass
+                        for k, out_layer in enumerate(layer.out_layers):
+                            if isinstance(layer, torch.nn.Conv2d):
+                                self.model.input_blocks[i][j].out_layers[k] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), out_layer, DeepShrinkHiresFix.DSHF_Unscale())
+                                pass
+                            pass
+                        pass
+                    elif isinstance(layer, SpatialTransformer):
+                        pass
+                    else:
+                        if isinstance(layer, torch.nn.Conv2d):
+                            self.model.input_blocks[i][j] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        if isinstance(layer, Downsample):
+                            self.model.input_blocks[i][j].op = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer.op, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        if isinstance(layer, Upsample):
+                            self.model.input_blocks[i][j] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        pass
+                    pass
+                pass
+            for j, layer in enumerate(self.model.middle_block):
+                if isinstance(layer, ResBlock):
+                    for k, in_layer in enumerate(layer.in_layers):
+                        if isinstance(layer, torch.nn.Conv2d):
+                            self.model.middle_block[j].in_layers[k] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), in_layer, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        pass
+                    for k, out_layer in enumerate(layer.out_layers):
+                        if isinstance(layer, torch.nn.Conv2d):
+                            self.model.middle_block[j].out_layers[k] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), out_layer, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        pass
+                    pass
+                elif isinstance(layer, SpatialTransformer):
+                    pass
+                else:
+                    if isinstance(layer, torch.nn.Conv2d):
+                        self.model.middle_block[j] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer, DeepShrinkHiresFix.DSHF_Unscale())
+                        pass
+                    if isinstance(layer, Downsample):
+                        self.model.middle_block[j].op = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer.op, DeepShrinkHiresFix.DSHF_Unscale())
+                        pass
+                    if isinstance(layer, Upsample):
+                        self.model.middle_block[j] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer, DeepShrinkHiresFix.DSHF_Unscale())
+                        pass
+                    pass
+                pass
+            for i, output_block in enumerate(self.model.output_blocks):
+                for j, layer in enumerate(output_block):
+                    if isinstance(layer, ResBlock):
+                        for k, in_layer in enumerate(layer.in_layers):
+                            if isinstance(layer, torch.nn.Conv2d):
+                                self.model.output_blocks[i][j].in_layers[k] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), in_layer, DeepShrinkHiresFix.DSHF_Unscale())
+                                pass
+                            pass
+                        for k, out_layer in enumerate(layer.out_layers):
+                            if isinstance(layer, torch.nn.Conv2d):
+                                self.model.output_blocks[i][j].out_layers[k] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), out_layer, DeepShrinkHiresFix.DSHF_Unscale())
+                                pass
+                            pass
+                        pass
+                    elif isinstance(layer, SpatialTransformer):
+                        pass
+                    else:
+                        if isinstance(layer, torch.nn.Conv2d):
+                            self.model.output_blocks[i][j] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        if isinstance(layer, Downsample):
+                            self.model.output_blocks[i][j].op = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer.op, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        if isinstance(layer, Upsample):
+                            self.model.output_blocks[i][j] = torch.nn.Sequential(DeepShrinkHiresFix.DSHF_Scale(), layer, DeepShrinkHiresFix.DSHF_Unscale())
+                            pass
+                        pass
+                    pass
+                pass
             pass
+
         def forward(self, x, timesteps, context, y=None, **kwargs):
             assert (y is not None) == (
                 self.model.num_classes is not None
@@ -135,8 +254,8 @@ class DeepShrinkHiresFix(scripts.Script):
 
             h = x.type(self.model.dtype)
             depth = 0
-            block = 0
-            scale = 1
+            DeepShrinkHiresFix.currentBlock = 0
+            DeepShrinkHiresFix.currentScale = 1
             for module in self.model.input_blocks:
                 for action in DeepShrinkHiresFix.deepShrinkHiresFixActions:
                     if action.enable == True and action.depth == depth and action.timestep < timesteps[0]:
@@ -144,15 +263,15 @@ class DeepShrinkHiresFix(scripts.Script):
                         break
                         pass
                     pass
-                if DeepShrinkHiresFix.enableExperimental and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
-                    h = torch.nn.functional.interpolate(h.float(), scale_factor=scale/DeepShrinkHiresFix.experimentalScales[block], mode="bicubic", align_corners=False).to(h.dtype)
-                    scale = DeepShrinkHiresFix.experimentalScales[block]
-                    ss.append(scale)
+                if DeepShrinkHiresFix.enableExperimental and not DeepShrinkHiresFix.conv2d_only and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
+                    h = torch.nn.functional.interpolate(h.float(), scale_factor=DeepShrinkHiresFix.currentScale/DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)
+                    DeepShrinkHiresFix.currentScale = DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock]
+                    ss.append(DeepShrinkHiresFix.currentScale)
                     pass
                 h = module(h, emb, context)
                 hs.append(h)
                 depth += 1
-                block += 1
+                DeepShrinkHiresFix.currentBlock += 1
                 pass
 
             for action in DeepShrinkHiresFix.deepShrinkHiresFixActions:
@@ -161,9 +280,9 @@ class DeepShrinkHiresFix(scripts.Script):
                     break
                     pass
                 pass
-            if DeepShrinkHiresFix.enableExperimental and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
-                h = torch.nn.functional.interpolate(h.float(), scale_factor=scale/DeepShrinkHiresFix.experimentalScales[block], mode="bicubic", align_corners=False).to(h.dtype)
-                scale = DeepShrinkHiresFix.experimentalScales[block]
+            if DeepShrinkHiresFix.enableExperimental and not DeepShrinkHiresFix.conv2d_only and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
+                h = torch.nn.functional.interpolate(h.float(), scale_factor=DeepShrinkHiresFix.currentScale/DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)
+                DeepShrinkHiresFix.currentScale = DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock]
                 pass
 
             h = self.model.middle_block(h, emb, context)
@@ -174,14 +293,14 @@ class DeepShrinkHiresFix(scripts.Script):
                     break
                     pass
                 pass
-            block += 1
+            DeepShrinkHiresFix.currentBlock += 1
 
             for module in self.model.output_blocks:
                 depth -= 1
-                if DeepShrinkHiresFix.enableExperimental and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
-                    h = torch.cat([torch.nn.functional.interpolate(h.float(), scale_factor=scale/DeepShrinkHiresFix.experimentalScales[block], mode="bicubic", align_corners=False).to(h.dtype), 
-                                   torch.nn.functional.interpolate(hs.pop().float(), scale_factor=ss.pop()/DeepShrinkHiresFix.experimentalScales[block], mode="bicubic", align_corners=False).to(h.dtype)], dim=1)
-                    scale = DeepShrinkHiresFix.experimentalScales[block]
+                if DeepShrinkHiresFix.enableExperimental and not DeepShrinkHiresFix.conv2d_only and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
+                    h = torch.cat([torch.nn.functional.interpolate(h.float(), scale_factor=DeepShrinkHiresFix.currentScale/DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock], mode="bicubic", align_corners=False).to(h.dtype), 
+                                   torch.nn.functional.interpolate(hs.pop().float(), scale_factor=ss.pop()/DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)], dim=1)
+                    DeepShrinkHiresFix.currentScale = DeepShrinkHiresFix.experimentalScales[DeepShrinkHiresFix.currentBlock]
                     pass
                 else:
                     h = torch.cat([h, hs.pop()], dim=1)
@@ -193,10 +312,10 @@ class DeepShrinkHiresFix(scripts.Script):
                         break
                         pass
                     pass
-                block += 1
+                DeepShrinkHiresFix.currentBlock += 1
                 pass
-            if DeepShrinkHiresFix.enableExperimental and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
-                h = torch.nn.functional.interpolate(h.float(), scale_factor=scale, mode="bicubic", align_corners=False).to(h.dtype)
+            if DeepShrinkHiresFix.enableExperimental and not DeepShrinkHiresFix.conv2d_only and timesteps[0] >= DeepShrinkHiresFix.experimentalTimestep:
+                h = torch.nn.functional.interpolate(h.float(), scale_factor=DeepShrinkHiresFix.currentScale, mode="bicubic", align_corners=False).to(h.dtype)
                 pass
             h = h.type(x.dtype)
             if self.model.predict_codebook_ids:
