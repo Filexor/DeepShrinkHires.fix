@@ -164,9 +164,18 @@ class DSHF(scripts.Script):
         DSHF.conv2d_only = args[8*4+1]
         for i in range(4):
             scaleslist = args[8*4+2+i*5+2].split(",")
+            for j, item in enumerate(scaleslist):
+                scaleslist[j] = float(item)
+                pass
             premultiplierslist = args[8*4+2+i*5+3].split(",")
+            for j, item in enumerate(premultiplierslist):
+                premultiplierslist[j] = float(item)
+                pass
             postmultiplierslist = args[8*4+2+i*5+4].split(",")
-            DSHF.dshf_experimantal_actions.append(args[8*4+2+i*5], args[8*4+2+i*5+1], scaleslist, premultiplierslist, postmultiplierslist)
+            for j, item in enumerate(postmultiplierslist):
+                postmultiplierslist[j] = float(item)
+                pass
+            DSHF.dshf_experimantal_actions.append(DSHFExperimantalAction(args[8*4+2+i*5], args[8*4+2+i*5+1], scaleslist, premultiplierslist, postmultiplierslist))
             pass
         pass
 
