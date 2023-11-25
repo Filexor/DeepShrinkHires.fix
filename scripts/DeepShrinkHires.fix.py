@@ -39,6 +39,7 @@ class DSHF(scripts.Script):
     dshf_experimantal_actions: list[DSHFExperimantalAction] = []
     currentScale: float = 1
     currentBlock: int = 0
+    currentConv: int = 0
     currentTimestep: float = 1000
 
     def __init__(self):
@@ -107,38 +108,53 @@ class DSHF(scripts.Script):
             with gradio.Accordion(label="Experimental Settings", open=False):
                 with gradio.Row():
                     Enable_Experimental = gradio.Checkbox(value=False, label="Enable Experimental Mode")
-                    Conv2DOnly = gradio.Checkbox(value=False, label="Conv2D Only")
-                    pass
-                with gradio.Row():
-                    Enable_Experimental_1 = gradio.Checkbox(value=True, label="Enable 1")
-                    Timestep_Experimental_1 = gradio.Number(value=750, label="Timestep 1")
-                    Scale_Experimental_1 = gradio.Textbox(value="1,1,1, 1,1,2, 1,1,2, 1,2,2, 1, 1,2,1, 1,1,1, 2,1,1, 1,1,1, 1", label="Scale Factors List 1")
-                    Premultiplier_Experimental_1 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="In-multipriers List 1")
-                    Postmultiplier_Experimental_1 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="Out-multipriers List 1")
                     # presets:
                     # 1,1,1, 1,1,2, 1,2,2, 2,2,2, 2, 2,2,2, 2,2,2, 2,2,2, 1,1,1, 1 
                     # 1,1,1, 1,1,2, 1,1,2, 1,2,2, 1, 1,2,1, 1,1,1, 2,1,1, 1,1,1, 1
                     pass
                 with gradio.Row():
+                    Enable_Experimental_1 = gradio.Checkbox(value=True, label="Enable 1")
+                    Scale_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
+                                                          label="Scale Factors List 1", lines=2)
+                    pass
+                with gradio.Row():
+                    Timestep_Experimental_1 = gradio.Number(value=750, label="Timestep 1")
+                    Premultiplier_Experimental_1 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 1")
+                    Postmultiplier_Experimental_1 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 1")
+                    pass
+                with gradio.Row():
                     Enable_Experimental_2 = gradio.Checkbox(value=False, label="Enable 2")
+                    Scale_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
+                                                          label="Scale Factors List 2", lines=2)
+                    pass
+                with gradio.Row():
                     Timestep_Experimental_2 = gradio.Number(value=750, label="Timestep 2")
-                    Scale_Experimental_2 = gradio.Textbox(value="1,1,1, 1,1,2, 1,1,2, 1,2,2, 1, 1,2,1, 1,1,1, 2,1,1, 1,1,1, 1", label="Scale Factors List 2")
-                    Premultiplier_Experimental_2 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="In-multipriers List 2")
-                    Postmultiplier_Experimental_2 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="Out-multipriers List 2")
+                    Premultiplier_Experimental_2 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 2")
+                    Postmultiplier_Experimental_2 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 2")
                     pass
                 with gradio.Row():
                     Enable_Experimental_3 = gradio.Checkbox(value=False, label="Enable 3")
+                    Scale_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
+                                                          label="Scale Factors List 3", lines=2)
+                    pass
+                with gradio.Row():
                     Timestep_Experimental_3 = gradio.Number(value=750, label="Timestep 3")
-                    Scale_Experimental_3 = gradio.Textbox(value="1,1,1, 1,1,2, 1,1,2, 1,2,2, 1, 1,2,1, 1,1,1, 2,1,1, 1,1,1, 1", label="Scale Factors List 3")
-                    Premultiplier_Experimental_3 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="In-multipriers List 3")
-                    Postmultiplier_Experimental_3 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="Out-multipriers List 3")
+                    Premultiplier_Experimental_3 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 3")
+                    Postmultiplier_Experimental_3 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 3")
                     pass
                 with gradio.Row():
                     Enable_Experimental_4 = gradio.Checkbox(value=False, label="Enable 4")
+                    Scale_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
+                                                          label="Scale Factors List 4", lines=2)
+                    pass
+                with gradio.Row():
                     Timestep_Experimental_4 = gradio.Number(value=750, label="Timestep 4")
-                    Scale_Experimental_4 = gradio.Textbox(value="1,1,1, 1,1,2, 1,1,2, 1,2,2, 1, 1,2,1, 1,1,1, 2,1,1, 1,1,1, 1", label="Scale Factors List 4")
-                    Premultiplier_Experimental_4 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="In-multipriers List 4")
-                    Postmultiplier_Experimental_4 = gradio.Textbox(value="1,1,1, 1,1,1, 1,1,1, 1,1,1, 1, 1,1,1, 1,1,1, 1,1,1, 1,1,1, 1", label="Out-multipriers List 4")
+                    Premultiplier_Experimental_4 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 4")
+                    Postmultiplier_Experimental_4 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 4")
                     pass
                 with gradio.Row():
                     
@@ -147,7 +163,7 @@ class DSHF(scripts.Script):
             pass
         return [Enable_1, Timestep_1, Depth_1, Scale_1, Enable_2, Timestep_2, Depth_2, Scale_2, Enable_3, Timestep_3, Depth_3, Scale_3, Enable_4, Timestep_4, Depth_4, Scale_4,
                 Enable_5, Timestep_5, Depth_5, Scale_5, Enable_6, Timestep_6, Depth_6, Scale_6, Enable_7, Timestep_7, Depth_7, Scale_7, Enable_8, Timestep_8, Depth_8, Scale_8,
-                Enable_Experimental, Conv2DOnly,
+                Enable_Experimental, 
                 Enable_Experimental_1, Timestep_Experimental_1, Scale_Experimental_1, Premultiplier_Experimental_1, Postmultiplier_Experimental_1,
                 Enable_Experimental_2, Timestep_Experimental_2, Scale_Experimental_2, Premultiplier_Experimental_2, Postmultiplier_Experimental_2,
                 Enable_Experimental_3, Timestep_Experimental_3, Scale_Experimental_3, Premultiplier_Experimental_3, Postmultiplier_Experimental_3,
@@ -161,30 +177,30 @@ class DSHF(scripts.Script):
             pass
         del DSHF.dshf_experimantal_actions[:]
         DSHF.enableExperimental = args[8*4]
-        DSHF.conv2d_only = args[8*4+1]
         for i in range(4):
-            scaleslist = args[8*4+2+i*5+2].split(",")
+            scaleslist = args[8*4+1+i*5+2].split(";")
             for j, item in enumerate(scaleslist):
-                scaleslist[j] = float(item)
+                scaleslist[j] = float(eval(item))
                 pass
-            premultiplierslist = args[8*4+2+i*5+3].split(",")
+            premultiplierslist = args[8*4+1+i*5+3].split(";")
             for j, item in enumerate(premultiplierslist):
-                premultiplierslist[j] = float(item)
+                premultiplierslist[j] = float(eval(item))
                 pass
-            postmultiplierslist = args[8*4+2+i*5+4].split(",")
+            postmultiplierslist = args[8*4+1+i*5+4].split(";")
             for j, item in enumerate(postmultiplierslist):
-                postmultiplierslist[j] = float(item)
+                postmultiplierslist[j] = float(eval(item))
                 pass
-            DSHF.dshf_experimantal_actions.append(DSHFExperimantalAction(args[8*4+2+i*5], args[8*4+2+i*5+1], scaleslist, premultiplierslist, postmultiplierslist))
+            DSHF.dshf_experimantal_actions.append(DSHFExperimantalAction(args[8*4+1+i*5], args[8*4+1+i*5+1], scaleslist, premultiplierslist, postmultiplierslist))
             pass
         pass
 
     class DSHF_Scale(torch.nn.Module):
         def forward(self, h):
-            if DSHF.enableExperimental and DSHF.conv2d_only:
+            if DSHF.enableExperimental:
                 for action in DSHF.dshf_experimantal_actions:
                     if action.enable == True and action.timestep <= DSHF.currentTimestep:
-                        return torch.nn.functional.interpolate(h.float(), scale_factor=1/action.scales[DSHF.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)
+                        h = torch.nn.functional.interpolate(h.float(), scale_factor=1/action.scales[DSHF.currentConv], mode="bicubic", align_corners=False).to(h.dtype)
+                        break
                         pass
                     pass
                 pass
@@ -194,20 +210,22 @@ class DSHF(scripts.Script):
 
     class DSHF_Unscale(torch.nn.Module):
         def forward(self, h):
-            if DSHF.enableExperimental and DSHF.conv2d_only:
+            if DSHF.enableExperimental:
                 for action in DSHF.dshf_experimantal_actions:
                     if action.enable == True and action.timestep <= DSHF.currentTimestep:
-                        return torch.nn.functional.interpolate(h.float(), scale_factor=action.scales[DSHF.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)
+                        h = torch.nn.functional.interpolate(h.float(), scale_factor=action.scales[DSHF.currentConv], mode="bicubic", align_corners=False).to(h.dtype)
+                        break
                         pass
                     pass
                 pass
+            DSHF.currentConv += 1
             return h
             pass
         pass
 
     class DSHF_InMul(torch.nn.Module):
         def forward(self, h: torch.Tensor):
-            if DSHF.enableExperimental and DSHF.conv2d_only:
+            if DSHF.enableExperimental:
                 for action in DSHF.dshf_experimantal_actions:
                     if action.enable == True and action.timestep <= DSHF.currentTimestep and action.in_multipliers[DSHF.currentBlock] != 1:
                         return h.mul(action.in_multipliers[DSHF.currentBlock])
@@ -220,7 +238,7 @@ class DSHF(scripts.Script):
 
     class DSHF_OutMul(torch.nn.Module):
         def forward(self, h: torch.Tensor):
-            if DSHF.enableExperimental and DSHF.conv2d_only:
+            if DSHF.enableExperimental:
                 for action in DSHF.dshf_experimantal_actions:
                     if action.enable == True and action.timestep <= DSHF.currentTimestep and action.out_multipliers[DSHF.currentBlock] != 1:
                         return h.mul(action.out_multipliers[DSHF.currentBlock])
@@ -352,6 +370,7 @@ class DSHF(scripts.Script):
             h = x.type(self.model.dtype)
             depth = 0
             DSHF.currentBlock = 0
+            DSHF.currentConv = 0
             DSHF.currentScale = 1
             DSHF.currentTimestep = timesteps[0]
             for module in self.model.input_blocks:
@@ -360,11 +379,6 @@ class DSHF(scripts.Script):
                         h = torch.nn.functional.interpolate(h.float(), scale_factor=1/action.scale, mode="bicubic", align_corners=False).to(h.dtype)
                         break
                         pass
-                    pass
-                if DSHF.enableExperimental and not DSHF.conv2d_only and timesteps[0] >= DSHF.experimentalTimestep:
-                    h = torch.nn.functional.interpolate(h.float(), scale_factor=DSHF.currentScale/DSHF.experimentalScales[DSHF.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)
-                    DSHF.currentScale = DSHF.experimentalScales[DSHF.currentBlock]
-                    ss.append(DSHF.currentScale)
                     pass
                 h = module(h, emb, context)
                 hs.append(h)
@@ -377,10 +391,6 @@ class DSHF(scripts.Script):
                     h = torch.nn.functional.interpolate(h.float(), scale_factor=1/action.scale, mode="bicubic", align_corners=False).to(h.dtype)
                     break
                     pass
-                pass
-            if DSHF.enableExperimental and not DSHF.conv2d_only and timesteps[0] >= DSHF.experimentalTimestep:
-                h = torch.nn.functional.interpolate(h.float(), scale_factor=DSHF.currentScale/DSHF.experimentalScales[DSHF.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)
-                DSHF.currentScale = DSHF.experimentalScales[DSHF.currentBlock]
                 pass
 
             h = self.model.middle_block(h, emb, context)
@@ -395,14 +405,7 @@ class DSHF(scripts.Script):
 
             for module in self.model.output_blocks:
                 depth -= 1
-                if DSHF.enableExperimental and not DSHF.conv2d_only and timesteps[0] >= DSHF.experimentalTimestep:
-                    h = torch.cat([torch.nn.functional.interpolate(h.float(), scale_factor=DSHF.currentScale/DSHF.experimentalScales[DSHF.currentBlock], mode="bicubic", align_corners=False).to(h.dtype), 
-                                   torch.nn.functional.interpolate(hs.pop().float(), scale_factor=ss.pop()/DSHF.experimentalScales[DSHF.currentBlock], mode="bicubic", align_corners=False).to(h.dtype)], dim=1)
-                    DSHF.currentScale = DSHF.experimentalScales[DSHF.currentBlock]
-                    pass
-                else:
-                    h = torch.cat([h, hs.pop()], dim=1)
-                    pass
+                h = torch.cat([h, hs.pop()], dim=1)
                 h = module(h, emb, context)
                 for action in DSHF.dshf_actions:
                     if action.enable == True and action.depth == depth and action.timestep < timesteps[0]:
@@ -411,9 +414,6 @@ class DSHF(scripts.Script):
                         pass
                     pass
                 DSHF.currentBlock += 1
-                pass
-            if DSHF.enableExperimental and not DSHF.conv2d_only and timesteps[0] >= DSHF.experimentalTimestep:
-                h = torch.nn.functional.interpolate(h.float(), scale_factor=DSHF.currentScale, mode="bicubic", align_corners=False).to(h.dtype)
                 pass
             h = h.type(x.dtype)
             if self.model.predict_codebook_ids:
