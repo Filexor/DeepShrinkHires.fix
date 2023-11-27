@@ -109,8 +109,8 @@ class DSHF(scripts.Script):
                 with gradio.Row():
                     Enable_Experimental = gradio.Checkbox(value=False, label="Enable Experimental Mode")
                     # presets:
-                    # 1,1,1, 1,1,2, 1,2,2, 2,2,2, 2, 2,2,2, 2,2,2, 2,2,2, 1,1,1, 1 
-                    # 1,1,1, 1,1,2, 1,1,2, 1,2,2, 1, 1,2,1, 1,1,1, 2,1,1, 1,1,1, 1
+                    # 1; 1;2; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;
+                    # 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1
                     pass
                 with gradio.Row():
                     Enable_Experimental_1 = gradio.Checkbox(value=True, label="Enable 1")
