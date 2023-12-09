@@ -130,7 +130,7 @@ class DSHF(scripts.Script):
 
                 with gradio.Row():
                     Enable_Experimental_2 = gradio.Checkbox(value=True, label="Enable 2")
-                    Scale_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+                    Scale_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 2", lines=2)
                     pass
                 with gradio.Row():
@@ -145,7 +145,7 @@ class DSHF(scripts.Script):
 
                 with gradio.Row():
                     Enable_Experimental_3 = gradio.Checkbox(value=False, label="Enable 3")
-                    Scale_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+                    Scale_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 3", lines=2)
                     pass
                 with gradio.Row():
@@ -160,7 +160,7 @@ class DSHF(scripts.Script):
                 
                 with gradio.Row():
                     Enable_Experimental_4 = gradio.Checkbox(value=False, label="Enable 4")
-                    Scale_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+                    Scale_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 4", lines=2)
                     pass
                 with gradio.Row():
