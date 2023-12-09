@@ -115,13 +115,13 @@ class DSHF(scripts.Script):
                     pass
                 with gradio.Row():
                     Enable_Experimental_1 = gradio.Checkbox(value=True, label="Enable 1")
-                    Scale_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+                    Scale_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 1", lines=2)
                     pass
                 with gradio.Row():
-                    Timestep_Experimental_1 = gradio.Number(value=750, label="Timestep 1")
-                    Dilation_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
-1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 1", lines=2)
+                    Timestep_Experimental_1 = gradio.Number(value=625, label="Timestep 1")
+                    Dilation_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 2;2; 2;2; 2; 2;2; 2;2; 2; 2;2; 2;2; 2;2;\n\
+2;2; 2;2; 2;2; 2;2;2; 2;2; 2;2; 2;2;2; 2;2; 2;2; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 1", lines=2)
                     pass
                 with gradio.Row():
                     Premultiplier_Experimental_1 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 1")
@@ -129,12 +129,12 @@ class DSHF(scripts.Script):
                     pass
 
                 with gradio.Row():
-                    Enable_Experimental_2 = gradio.Checkbox(value=False, label="Enable 2")
+                    Enable_Experimental_2 = gradio.Checkbox(value=True, label="Enable 2")
                     Scale_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 2", lines=2)
                     pass
                 with gradio.Row():
-                    Timestep_Experimental_2 = gradio.Number(value=750, label="Timestep 2")
+                    Timestep_Experimental_2 = gradio.Number(value=0, label="Timestep 2")
                     Dilation_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 2", lines=2)
                     pass
