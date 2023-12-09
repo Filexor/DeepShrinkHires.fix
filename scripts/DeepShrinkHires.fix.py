@@ -23,12 +23,13 @@ class DSHFAction():
     pass
 
 class DSHFExperimantalAction():
-    def __init__(self, enable:bool, timestep: float, scales: list[float], in_multipliers: list[float], out_multipliers: list[float]):
+    def __init__(self, enable:bool, timestep: float, scales: list[float], in_multipliers: list[float], out_multipliers: list[float], dilations: list[int]):
         self.enable = enable
         self.timestep = timestep
         self.scales = scales
         self.in_multipliers = in_multipliers
         self.out_multipliers = out_multipliers
+        self.dilations = dilations
         pass
     pass
 
@@ -109,65 +110,78 @@ class DSHF(scripts.Script):
                 with gradio.Row():
                     Enable_Experimental = gradio.Checkbox(value=False, label="Enable Experimental Mode")
                     # presets:
-                    # 1; 1;2; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;
+                    # 1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;
                     # 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1
                     pass
                 with gradio.Row():
                     Enable_Experimental_1 = gradio.Checkbox(value=True, label="Enable 1")
-                    Scale_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
-1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
-                                                          label="Scale Factors List 1", lines=2)
+                    Scale_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 1", lines=2)
                     pass
                 with gradio.Row():
                     Timestep_Experimental_1 = gradio.Number(value=750, label="Timestep 1")
+                    Dilation_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 1", lines=2)
+                    pass
+                with gradio.Row():
                     Premultiplier_Experimental_1 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 1")
                     Postmultiplier_Experimental_1 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 1")
                     pass
+
                 with gradio.Row():
                     Enable_Experimental_2 = gradio.Checkbox(value=False, label="Enable 2")
-                    Scale_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
-1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
-                                                          label="Scale Factors List 2", lines=2)
+                    Scale_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 2", lines=2)
                     pass
                 with gradio.Row():
                     Timestep_Experimental_2 = gradio.Number(value=750, label="Timestep 2")
+                    Dilation_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 2", lines=2)
+                    pass
+                with gradio.Row():
                     Premultiplier_Experimental_2 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 2")
                     Postmultiplier_Experimental_2 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 2")
                     pass
+
                 with gradio.Row():
                     Enable_Experimental_3 = gradio.Checkbox(value=False, label="Enable 3")
-                    Scale_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
-1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
-                                                          label="Scale Factors List 3", lines=2)
+                    Scale_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 3", lines=2)
                     pass
                 with gradio.Row():
                     Timestep_Experimental_3 = gradio.Number(value=750, label="Timestep 3")
+                    Dilation_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 3", lines=2)
+                    pass
+                with gradio.Row():
                     Premultiplier_Experimental_3 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 3")
                     Postmultiplier_Experimental_3 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 3")
                     pass
+                
                 with gradio.Row():
                     Enable_Experimental_4 = gradio.Checkbox(value=False, label="Enable 4")
-                    Scale_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
-1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", 
-                                                          label="Scale Factors List 4", lines=2)
+                    Scale_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 4", lines=2)
                     pass
                 with gradio.Row():
                     Timestep_Experimental_4 = gradio.Number(value=750, label="Timestep 4")
+                    Dilation_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
+1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 4", lines=2)
+                    pass
+                with gradio.Row():
                     Premultiplier_Experimental_4 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="In-multipriers List 4")
                     Postmultiplier_Experimental_4 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1; 1", label="Out-multipriers List 4")
                     pass
-                with gradio.Row():
-                    
-                    pass
+
                 pass
             pass
         return [Enable_1, Timestep_1, Depth_1, Scale_1, Enable_2, Timestep_2, Depth_2, Scale_2, Enable_3, Timestep_3, Depth_3, Scale_3, Enable_4, Timestep_4, Depth_4, Scale_4,
                 Enable_5, Timestep_5, Depth_5, Scale_5, Enable_6, Timestep_6, Depth_6, Scale_6, Enable_7, Timestep_7, Depth_7, Scale_7, Enable_8, Timestep_8, Depth_8, Scale_8,
                 Enable_Experimental, 
-                Enable_Experimental_1, Timestep_Experimental_1, Scale_Experimental_1, Premultiplier_Experimental_1, Postmultiplier_Experimental_1,
-                Enable_Experimental_2, Timestep_Experimental_2, Scale_Experimental_2, Premultiplier_Experimental_2, Postmultiplier_Experimental_2,
-                Enable_Experimental_3, Timestep_Experimental_3, Scale_Experimental_3, Premultiplier_Experimental_3, Postmultiplier_Experimental_3,
-                Enable_Experimental_4, Timestep_Experimental_4, Scale_Experimental_4, Premultiplier_Experimental_4, Postmultiplier_Experimental_4,]
+                Enable_Experimental_1, Timestep_Experimental_1, Scale_Experimental_1, Premultiplier_Experimental_1, Postmultiplier_Experimental_1, Dilation_Experimental_1,
+                Enable_Experimental_2, Timestep_Experimental_2, Scale_Experimental_2, Premultiplier_Experimental_2, Postmultiplier_Experimental_2, Dilation_Experimental_2, 
+                Enable_Experimental_3, Timestep_Experimental_3, Scale_Experimental_3, Premultiplier_Experimental_3, Postmultiplier_Experimental_3, Dilation_Experimental_3, 
+                Enable_Experimental_4, Timestep_Experimental_4, Scale_Experimental_4, Premultiplier_Experimental_4, Postmultiplier_Experimental_4, Dilation_Experimental_4]
         pass
 
     def process(self, p, *args):
@@ -178,28 +192,38 @@ class DSHF(scripts.Script):
         del DSHF.dshf_experimantal_actions[:]
         DSHF.enableExperimental = args[8*4]
         for i in range(4):
-            scaleslist = args[8*4+1+i*5+2].split(";")
+            scaleslist = args[8*4+1+i*6+2].split(";")
             for j, item in enumerate(scaleslist):
                 scaleslist[j] = float(eval(item))
                 pass
-            premultiplierslist = args[8*4+1+i*5+3].split(";")
+            premultiplierslist = args[8*4+1+i*6+3].split(";")
             for j, item in enumerate(premultiplierslist):
                 premultiplierslist[j] = float(eval(item))
                 pass
-            postmultiplierslist = args[8*4+1+i*5+4].split(";")
+            postmultiplierslist = args[8*4+1+i*6+4].split(";")
             for j, item in enumerate(postmultiplierslist):
                 postmultiplierslist[j] = float(eval(item))
                 pass
-            DSHF.dshf_experimantal_actions.append(DSHFExperimantalAction(args[8*4+1+i*5], args[8*4+1+i*5+1], scaleslist, premultiplierslist, postmultiplierslist))
+            dilationlist = args[8*4+1+i*6+5].split(";")
+            for j, item in enumerate(dilationlist):
+                dilationlist[j] = int(eval(item))
+                pass
+            DSHF.dshf_experimantal_actions.append(DSHFExperimantalAction(args[8*4+1+i*6], args[8*4+1+i*6+1], scaleslist, premultiplierslist, postmultiplierslist, dilationlist))
             pass
         pass
 
     class DSHF_Scale(torch.nn.Module):
+        def __init__(self, conv2D: list[torch.nn.Conv2d], *args, **kwargs) -> None:
+            super().__init__(*args, **kwargs)
+            self.conv2D = conv2D
+            pass
         def forward(self, h):
             if DSHF.enableExperimental:
                 for action in DSHF.dshf_experimantal_actions:
                     if action.enable == True and action.timestep <= DSHF.currentTimestep:
                         h = torch.nn.functional.interpolate(h.float(), scale_factor=1/action.scales[DSHF.currentConv], mode="bicubic", align_corners=False).to(h.dtype)
+                        self.conv2D[0].dilation = action.dilations[DSHF.currentConv]
+                        self.conv2D[0].padding = action.dilations[DSHF.currentConv]
                         break
                         pass
                     pass
@@ -260,13 +284,13 @@ class DSHF(scripts.Script):
                     if isinstance(layer, ResBlock):
                         for k, in_layer in enumerate(layer.in_layers):
                             if isinstance(in_layer, torch.nn.Conv2d):
-                                self.model.input_blocks[i][j].in_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale(), in_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_InMul())
+                                self.model.input_blocks[i][j].in_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale([in_layer]), in_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_InMul())
                                 pass
                             pass
                         #self.model.input_blocks[i][j].emb_layers.append(DeepShrinkHiresFix.DSHF_Mul())
                         for k, out_layer in enumerate(layer.out_layers):
                             if isinstance(out_layer, torch.nn.Conv2d):
-                                self.model.input_blocks[i][j].out_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale(), out_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_OutMul())
+                                self.model.input_blocks[i][j].out_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale([out_layer]), out_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_OutMul())
                                 pass
                             pass
                         pass
@@ -274,13 +298,13 @@ class DSHF(scripts.Script):
                         pass
                     else:
                         if isinstance(layer, torch.nn.Conv2d):
-                            self.model.input_blocks[i][j] = torch.nn.Sequential(DSHF.DSHF_Scale(), layer, DSHF.DSHF_Unscale())
+                            self.model.input_blocks[i][j] = torch.nn.Sequential(DSHF.DSHF_Scale([layer]), layer, DSHF.DSHF_Unscale())
                             pass
                         if isinstance(layer, Downsample):
-                            self.model.input_blocks[i][j].op = torch.nn.Sequential(DSHF.DSHF_Scale(), layer.op, DSHF.DSHF_Unscale())
+                            self.model.input_blocks[i][j].op = torch.nn.Sequential(DSHF.DSHF_Scale([layer.op]), layer.op, DSHF.DSHF_Unscale())
                             pass
                         if isinstance(layer, Upsample):
-                            self.model.input_blocks[i][j].conv = torch.nn.Sequential(DSHF.DSHF_Scale(), layer.conv, DSHF.DSHF_Unscale())
+                            self.model.input_blocks[i][j].conv = torch.nn.Sequential(DSHF.DSHF_Scale([layer.conv]), layer.conv, DSHF.DSHF_Unscale())
                             pass
                         pass
                     pass
@@ -290,13 +314,13 @@ class DSHF(scripts.Script):
                 if isinstance(layer, ResBlock):
                     for k, in_layer in enumerate(layer.in_layers):
                         if isinstance(in_layer, torch.nn.Conv2d):
-                            self.model.middle_block[j].in_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale(), in_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_InMul())
+                            self.model.middle_block[j].in_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale([in_layer]), in_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_InMul())
                             pass
                         pass
                     #self.model.middle_block[j].emb_layers.append(DeepShrinkHiresFix.DSHF_Mul())
                     for k, out_layer in enumerate(layer.out_layers):
                         if isinstance(out_layer, torch.nn.Conv2d):
-                            self.model.middle_block[j].out_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale(), out_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_OutMul())
+                            self.model.middle_block[j].out_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale([out_layer]), out_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_OutMul())
                             pass
                         pass
                     pass
@@ -304,13 +328,13 @@ class DSHF(scripts.Script):
                     pass
                 else:
                     if isinstance(layer, torch.nn.Conv2d):
-                        self.model.middle_block[j] = torch.nn.Sequential(DSHF.DSHF_Scale(), layer, DSHF.DSHF_Unscale())
+                        self.model.middle_block[j] = torch.nn.Sequential(DSHF.DSHF_Scale([layer]), layer, DSHF.DSHF_Unscale())
                         pass
                     if isinstance(layer, Downsample):
-                        self.model.middle_block[j].op = torch.nn.Sequential(DSHF.DSHF_Scale(), layer.op, DSHF.DSHF_Unscale())
+                        self.model.middle_block[j].op = torch.nn.Sequential(DSHF.DSHF_Scale([layer.op]), layer.op, DSHF.DSHF_Unscale())
                         pass
                     if isinstance(layer, Upsample):
-                        self.model.middle_block[j].conv = torch.nn.Sequential(DSHF.DSHF_Scale(), layer.conv, DSHF.DSHF_Unscale())
+                        self.model.middle_block[j].conv = torch.nn.Sequential(DSHF.DSHF_Scale([layer.conv]), layer.conv, DSHF.DSHF_Unscale())
                         pass
                     pass
                 pass
@@ -320,13 +344,13 @@ class DSHF(scripts.Script):
                     if isinstance(layer, ResBlock):
                         for k, in_layer in enumerate(layer.in_layers):
                             if isinstance(in_layer, torch.nn.Conv2d):
-                                self.model.output_blocks[i][j].in_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale(), in_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_InMul())
+                                self.model.output_blocks[i][j].in_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale([in_layer]), in_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_InMul())
                                 pass
                             pass
                         #self.model.output_blocks[i][j].emb_layers.append(DeepShrinkHiresFix.DSHF_Mul())
                         for k, out_layer in enumerate(layer.out_layers):
                             if isinstance(out_layer, torch.nn.Conv2d):
-                                self.model.output_blocks[i][j].out_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale(), out_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_OutMul())
+                                self.model.output_blocks[i][j].out_layers[k] = torch.nn.Sequential(DSHF.DSHF_Scale([out_layer]), out_layer, DSHF.DSHF_Unscale(), DSHF.DSHF_OutMul())
                                 pass
                             pass
                         pass
@@ -334,13 +358,13 @@ class DSHF(scripts.Script):
                         pass
                     else:
                         if isinstance(layer, torch.nn.Conv2d):
-                            self.model.output_blocks[i][j] = torch.nn.Sequential(DSHF.DSHF_Scale(), layer, DSHF.DSHF_Unscale())
+                            self.model.output_blocks[i][j] = torch.nn.Sequential(DSHF.DSHF_Scale([layer]), layer, DSHF.DSHF_Unscale())
                             pass
                         if isinstance(layer, Downsample):
-                            self.model.output_blocks[i][j].op = torch.nn.Sequential(DSHF.DSHF_Scale(), layer.op, DSHF.DSHF_Unscale())
+                            self.model.output_blocks[i][j].op = torch.nn.Sequential(DSHF.DSHF_Scale([layer.op]), layer.op, DSHF.DSHF_Unscale())
                             pass
                         if isinstance(layer, Upsample):
-                            self.model.output_blocks[i][j].conv = torch.nn.Sequential(DSHF.DSHF_Scale(), layer.conv, DSHF.DSHF_Unscale())
+                            self.model.output_blocks[i][j].conv = torch.nn.Sequential(DSHF.DSHF_Scale([layer.conv]), layer.conv, DSHF.DSHF_Unscale())
                             pass
                         pass
                     pass
@@ -348,7 +372,7 @@ class DSHF(scripts.Script):
 
             for i, module in enumerate(self.model.out):
                 if isinstance(module, torch.nn.Conv2d):
-                    self.model.out[i] = torch.nn.Sequential(DSHF.DSHF_Scale(), module, DSHF.DSHF_Unscale())
+                    self.model.out[i] = torch.nn.Sequential(DSHF.DSHF_Scale([module]), module, DSHF.DSHF_Unscale())
                     pass
                 pass
 
