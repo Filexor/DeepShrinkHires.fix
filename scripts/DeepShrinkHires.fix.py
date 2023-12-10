@@ -23,13 +23,14 @@ class DSHFAction():
     pass
 
 class DSHFExperimantalAction():
-    def __init__(self, enable:bool, timestep: float, scales: list[float], in_multipliers: list[float], out_multipliers: list[float], dilations: list[int]):
+    def __init__(self, enable:bool, timestep: float, scales: list[float], in_multipliers: list[float], out_multipliers: list[float], dilations: list[int], cfg_scale_scale: list[int]):
         self.enable = enable
         self.timestep = timestep
         self.scales = scales
         self.in_multipliers = in_multipliers
         self.out_multipliers = out_multipliers
         self.dilations = dilations
+        self.cfg_scale_scale = cfg_scale_scale
         pass
     pass
 
@@ -58,13 +59,13 @@ class DSHF(scripts.Script):
         with gradio.Accordion(label="Deep Shrink Hires.fix", open=False):
             with gradio.Row():
                 Enable_1 = gradio.Checkbox(value=True, label="Enable 1")
-                Timestep_1 = gradio.Number(value=900, label="Timestep 1")
+                Timestep_1 = gradio.Number(value=625, label="Timestep 1")
                 Depth_1 = gradio.Number(value=3, label="Block Depth 1", precision=0)
                 Scale_1 = gradio.Number(value=2, label="Scale factor 1")
                 pass
             with gradio.Row():
                 Enable_2 = gradio.Checkbox(value=True, label="Enable 2")
-                Timestep_2 = gradio.Number(value=650, label="Timestep 2")
+                Timestep_2 = gradio.Number(value=0, label="Timestep 2")
                 Depth_2 = gradio.Number(value=3, label="Block Depth 2", precision=0)
                 Scale_2 = gradio.Number(value=2, label="Scale factor 2")
                 pass
@@ -113,13 +114,17 @@ class DSHF(scripts.Script):
                     # 1; 1;1; 1;1; 1; 1;1; 1;1; 2; 2;1; 1;1; 1; 1;1; 1;1; 1;1;
                     # 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1
                     pass
+                
                 with gradio.Row():
-                    Enable_Experimental_1 = gradio.Checkbox(value=True, label="Enable 1")
+                    Enable_Experimental_1 = gradio.Checkbox(value=True, label="Enable Experimental 1")
+                    pass
+                with gradio.Row():
+                    Timestep_Experimental_1 = gradio.Number(value=625, label="Timestep Experimental 1")
                     Scale_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 1", lines=2)
                     pass
                 with gradio.Row():
-                    Timestep_Experimental_1 = gradio.Number(value=625, label="Timestep 1")
+                    CFG_Scale_Scale_Experimental_1 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1", label="CFG-Scale Scale List 1")
                     Dilation_Experimental_1 = gradio.Textbox(value="1; 1;1; 1;1; 1; 2;2; 2;2; 2; 2;2; 2;2; 2; 2;2; 2;2; 2;2;\n\
 2;2; 2;2; 2;2; 2;2;2; 2;2; 2;2; 2;2;2; 2;2; 2;2; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 1", lines=2)
                     pass
@@ -129,12 +134,15 @@ class DSHF(scripts.Script):
                     pass
 
                 with gradio.Row():
-                    Enable_Experimental_2 = gradio.Checkbox(value=True, label="Enable 2")
+                    Enable_Experimental_2 = gradio.Checkbox(value=True, label="Enable Experimental 2")
+                    pass
+                with gradio.Row():
+                    Timestep_Experimental_2 = gradio.Number(value=0, label="Timestep Experimental 2")
                     Scale_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 2", lines=2)
                     pass
                 with gradio.Row():
-                    Timestep_Experimental_2 = gradio.Number(value=0, label="Timestep 2")
+                    CFG_Scale_Scale_Experimental_2 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1", label="CFG-Scale Scale List 2")
                     Dilation_Experimental_2 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 2", lines=2)
                     pass
@@ -144,12 +152,15 @@ class DSHF(scripts.Script):
                     pass
 
                 with gradio.Row():
-                    Enable_Experimental_3 = gradio.Checkbox(value=False, label="Enable 3")
+                    Enable_Experimental_3 = gradio.Checkbox(value=False, label="Enable Experimental 3")
+                    pass
+                with gradio.Row():
+                    Timestep_Experimental_3 = gradio.Number(value=750, label="Timestep Experimental 3")
                     Scale_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 3", lines=2)
                     pass
                 with gradio.Row():
-                    Timestep_Experimental_3 = gradio.Number(value=750, label="Timestep 3")
+                    CFG_Scale_Scale_Experimental_3 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1", label="CFG-Scale Scale List 3")
                     Dilation_Experimental_3 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 3", lines=2)
                     pass
@@ -159,12 +170,15 @@ class DSHF(scripts.Script):
                     pass
                 
                 with gradio.Row():
-                    Enable_Experimental_4 = gradio.Checkbox(value=False, label="Enable 4")
+                    Enable_Experimental_4 = gradio.Checkbox(value=False, label="Enable Experimental 4")
+                    pass
+                with gradio.Row():
+                    Timestep_Experimental_4 = gradio.Number(value=750, label="Timestep Experimental 4")
                     Scale_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Scale Factors List 4", lines=2)
                     pass
                 with gradio.Row():
-                    Timestep_Experimental_4 = gradio.Number(value=750, label="Timestep 4")
+                    CFG_Scale_Scale_Experimental_4 = gradio.Textbox(value="1;1;1; 1;1;1; 1;1;1; 1;1;1; 1; 1;1;1; 1;1;1; 1;1;1; 1;1;1", label="CFG-Scale Scale List 4")
                     Dilation_Experimental_4 = gradio.Textbox(value="1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1; 1;1; 1;1; 1;1;\n\
 1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1;1; 1;1; 1;1; 1;1; 1", label="Dilation Factors List 4", lines=2)
                     pass
@@ -178,37 +192,43 @@ class DSHF(scripts.Script):
         return [Enable_1, Timestep_1, Depth_1, Scale_1, Enable_2, Timestep_2, Depth_2, Scale_2, Enable_3, Timestep_3, Depth_3, Scale_3, Enable_4, Timestep_4, Depth_4, Scale_4,
                 Enable_5, Timestep_5, Depth_5, Scale_5, Enable_6, Timestep_6, Depth_6, Scale_6, Enable_7, Timestep_7, Depth_7, Scale_7, Enable_8, Timestep_8, Depth_8, Scale_8,
                 Enable_Experimental, 
-                Enable_Experimental_1, Timestep_Experimental_1, Scale_Experimental_1, Premultiplier_Experimental_1, Postmultiplier_Experimental_1, Dilation_Experimental_1,
-                Enable_Experimental_2, Timestep_Experimental_2, Scale_Experimental_2, Premultiplier_Experimental_2, Postmultiplier_Experimental_2, Dilation_Experimental_2, 
-                Enable_Experimental_3, Timestep_Experimental_3, Scale_Experimental_3, Premultiplier_Experimental_3, Postmultiplier_Experimental_3, Dilation_Experimental_3, 
-                Enable_Experimental_4, Timestep_Experimental_4, Scale_Experimental_4, Premultiplier_Experimental_4, Postmultiplier_Experimental_4, Dilation_Experimental_4]
+                Enable_Experimental_1, Timestep_Experimental_1, Scale_Experimental_1, Premultiplier_Experimental_1, Postmultiplier_Experimental_1, Dilation_Experimental_1, CFG_Scale_Scale_Experimental_1,
+                Enable_Experimental_2, Timestep_Experimental_2, Scale_Experimental_2, Premultiplier_Experimental_2, Postmultiplier_Experimental_2, Dilation_Experimental_2, CFG_Scale_Scale_Experimental_2, 
+                Enable_Experimental_3, Timestep_Experimental_3, Scale_Experimental_3, Premultiplier_Experimental_3, Postmultiplier_Experimental_3, Dilation_Experimental_3, CFG_Scale_Scale_Experimental_3, 
+                Enable_Experimental_4, Timestep_Experimental_4, Scale_Experimental_4, Premultiplier_Experimental_4, Postmultiplier_Experimental_4, Dilation_Experimental_4, CFG_Scale_Scale_Experimental_4,]
         pass
 
     def process(self, p, *args):
-        del DSHF.dshf_actions[:]
-        for i in range(8):
-            DSHF.dshf_actions.append(DSHFAction(args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]))
-            pass
-        del DSHF.dshf_experimantal_actions[:]
-        DSHF.enableExperimental = args[8*4]
-        for i in range(4):
-            scaleslist = args[8*4+1+i*6+2].split(";")
-            for j, item in enumerate(scaleslist):
-                scaleslist[j] = float(eval(item))
+        if isinstance(sd_unet.current_unet, DSHF.DeepShrinkHiresFixUNet):
+            del DSHF.dshf_actions[:]
+            for i in range(8):
+                DSHF.dshf_actions.append(DSHFAction(args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]))
                 pass
-            premultiplierslist = args[8*4+1+i*6+3].split(";")
-            for j, item in enumerate(premultiplierslist):
-                premultiplierslist[j] = float(eval(item))
+            del DSHF.dshf_experimantal_actions[:]
+            DSHF.enableExperimental = args[8*4]
+            for i in range(4):
+                scaleslist = args[8*4+1+i*7+2].split(";")
+                for j, item in enumerate(scaleslist):
+                    scaleslist[j] = float(eval(item))
+                    pass
+                premultiplierslist = args[8*4+1+i*7+3].split(";")
+                for j, item in enumerate(premultiplierslist):
+                    premultiplierslist[j] = float(eval(item))
+                    pass
+                postmultiplierslist = args[8*4+1+i*7+4].split(";")
+                for j, item in enumerate(postmultiplierslist):
+                    postmultiplierslist[j] = float(eval(item))
+                    pass
+                dilationlist = args[8*4+1+i*7+5].split(";")
+                for j, item in enumerate(dilationlist):
+                    dilationlist[j] = int(eval(item))
+                    pass
+                cfgscalescalelist = args[8*4+1+i*7+6].split(";")
+                for j, item in enumerate(cfgscalescalelist):
+                    cfgscalescalelist[j] = int(eval(item))
+                    pass
+                DSHF.dshf_experimantal_actions.append(DSHFExperimantalAction(args[8*4+1+i*7], args[8*4+1+i*7+1], scaleslist, premultiplierslist, postmultiplierslist, dilationlist, cfgscalescalelist))
                 pass
-            postmultiplierslist = args[8*4+1+i*6+4].split(";")
-            for j, item in enumerate(postmultiplierslist):
-                postmultiplierslist[j] = float(eval(item))
-                pass
-            dilationlist = args[8*4+1+i*6+5].split(";")
-            for j, item in enumerate(dilationlist):
-                dilationlist[j] = int(eval(item))
-                pass
-            DSHF.dshf_experimantal_actions.append(DSHFExperimantalAction(args[8*4+1+i*6], args[8*4+1+i*6+1], scaleslist, premultiplierslist, postmultiplierslist, dilationlist))
             pass
         pass
 
@@ -398,29 +418,45 @@ class DSHF(scripts.Script):
             DSHF.currentScale = 1
             DSHF.currentTimestep = timesteps[0]
             for module in self.model.input_blocks:
+                context_tmp = context
                 for action in DSHF.dshf_actions:
-                    if action.enable == True and action.depth == depth and action.timestep < timesteps[0]:
+                    if action.enable and action.depth == depth and action.timestep < timesteps[0]:
                         h = torch.nn.functional.interpolate(h.float(), scale_factor=1/action.scale, mode="bicubic", align_corners=False).to(h.dtype)
                         break
                         pass
                     pass
-                h = module(h, emb, context)
+                if DSHF.enableExperimental:
+                    for action in DSHF.dshf_experimantal_actions:
+                        if action.enable and action.timestep < timesteps[0]:
+                            context_tmp = context * action.cfg_scale_scale[DSHF.currentBlock]
+                            pass
+                        pass
+                    pass
+                h = module(h, emb, context_tmp)
                 hs.append(h)
                 depth += 1
                 DSHF.currentBlock += 1
                 pass
 
+            context_tmp = context
             for action in DSHF.dshf_actions:
-                if action.enable == True and action.depth == depth and action.timestep < timesteps[0]:
+                if action.enable and action.depth == depth and action.timestep < timesteps[0]:
                     h = torch.nn.functional.interpolate(h.float(), scale_factor=1/action.scale, mode="bicubic", align_corners=False).to(h.dtype)
                     break
                     pass
                 pass
-
-            h = self.model.middle_block(h, emb, context)
+            
+            if DSHF.enableExperimental:
+                for action in DSHF.dshf_experimantal_actions:
+                    if action.enable and action.timestep < timesteps[0]:
+                        context_tmp = context * action.cfg_scale_scale[DSHF.currentBlock]
+                        pass
+                    pass
+                pass
+            h = self.model.middle_block(h, emb, context_tmp)
 
             for action in DSHF.dshf_actions:
-                if action.enable == True and action.depth == depth and action.timestep < timesteps[0]:
+                if action.enable and action.depth == depth and action.timestep < timesteps[0]:
                     h = torch.nn.functional.interpolate(h.float(), scale_factor=action.scale, mode="bicubic", align_corners=False).to(h.dtype)
                     break
                     pass
@@ -428,11 +464,19 @@ class DSHF(scripts.Script):
             DSHF.currentBlock += 1
 
             for module in self.model.output_blocks:
+                context_tmp = context
+                if DSHF.enableExperimental:
+                    for action in DSHF.dshf_experimantal_actions:
+                        if action.enable and action.timestep < timesteps[0]:
+                            context_tmp = context * action.cfg_scale_scale[DSHF.currentBlock]
+                            pass
+                        pass
+                    pass
                 depth -= 1
                 h = torch.cat([h, hs.pop()], dim=1)
-                h = module(h, emb, context)
+                h = module(h, emb, context_tmp)
                 for action in DSHF.dshf_actions:
-                    if action.enable == True and action.depth == depth and action.timestep < timesteps[0]:
+                    if action.enable and action.depth == depth and action.timestep < timesteps[0]:
                         h = torch.nn.functional.interpolate(h.float(), scale_factor=action.scale, mode="bicubic", align_corners=False).to(h.dtype)
                         break
                         pass
